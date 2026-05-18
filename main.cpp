@@ -5,14 +5,17 @@
 #include "elementos.h"
 #include "pc.h"
 #include "router.h"
+#include "switch.h"
 using namespace miniwin;
 
 void dibujarPc(int x, int y);
 void dibujarRouter(int x, int y);
+void dibujarSwitch(int x, int y);
 void dibujarBoton(const Boton& btn);
 void botonInicializar(Boton& btn, int x, int y, int ancho, int alto, const char* texto) ;
 bool botonRatonEncima(const Boton& btn);
 void crearPc(int x,int y);
+void crearRouter(int x, int t);
 void manejarArrastre();
 void detectarArrastre();
 void dibujarElementos();
@@ -29,19 +32,25 @@ int main() {
 
     vredimensiona(1500, 1500);
     
-    Boton boton;
-    botonInicializar(boton,20,950,200,50,"xd");
+    Boton botonPc, botonRouter;
+    botonInicializar(botonPc,20,950,200,50,"pc");
+    botonInicializar(botonRouter,600,950,200,50,"router");
 
     while (true) {
         color(NEGRO);
         rectangulo_lleno(0,0,1500,1500);
 
         dibujarElementos();
-        dibujarBoton(boton);
+        dibujarBoton(botonPc);
+        dibujarBoton(botonRouter);
+        dibujarSwitch(800,500);
         manejarArrastre();
 
-        if (!arrastrando && botonClick(boton)) {
-            crearPc(0,0);  // o posición predefinida
+        if (!arrastrando && botonClick(botonPc)) {
+            crearPc(0,0);  
+        }
+        if (!arrastrando && botonClick(botonRouter)) {
+            crearRouter(0,0);  
         }
         refresca();
         espera(10);
@@ -60,6 +69,15 @@ elemento.x=x;
 elemento.y=y;
 elementos.push_back(elemento);
 
+}
+
+void crearRouter(int x,int y){
+grafo.agregarNodo("router");
+ElementoVisual elemento;
+elemento.tipo=ROUTER;
+elemento.x=x;
+elemento.y=y;
+elementos.push_back(elemento);
 
 }
 void dibujarElementos(){
@@ -78,16 +96,16 @@ void manejarArrastre() {
         float mx = raton_x();
         float my = raton_y();
         for (size_t i = 0; i < elementos.size(); i++) {
-            if (elementos[i].tipo == PC) {
-                int x = elementos[i].x, y = elementos[i].y;
-                if (mx >= x && mx <= x+160 && my >= y && my <= y+160) {
-                    arrastrando = true;
-                    indiceArrastrado = i;
-                    offsetX = mx - x;
-                    offsetY = my - y;
-                    break;
-                }
+            
+            int x = elementos[i].x, y = elementos[i].y;
+            if (mx >= x && mx <= x+160 && my >= y && my <= y+160) {
+                arrastrando = true;
+                indiceArrastrado = i;
+                offsetX = mx - x;
+                offsetY = my - y;
+                break;
             }
+            
         }
     }
     // Actualización
@@ -122,12 +140,27 @@ void dibujarPc(int x, int y) {
 }
 
 void dibujarRouter(int x, int y) {
-    int escala = 4;
+    int escala = 6;
     for (int i = 0; i < 40; i++) {
         for (int j = 0; j < 40; j++) {
             int r = router[i][j].R;
             int g = router[i][j].G;
             int b = router[i][j].B;
+            color_rgb(r, g, b);
+            rectangulo_lleno(x + j * escala,
+                             y + i * escala,
+                             x + j * escala + escala - 1,
+                             y + i * escala + escala - 1);
+        }
+    }
+}
+void dibujarSwitch(int x, int y) {
+    int escala = 6;
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 40; j++) {
+            int r = switche[i][j].R;
+            int g = switche[i][j].G;
+            int b = switche[i][j].B;
             color_rgb(r, g, b);
             rectangulo_lleno(x + j * escala,
                              y + i * escala,
