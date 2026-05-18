@@ -1,6 +1,6 @@
 #include <vector>
 
-enum TipoElemento { PC, ROUTER };
+enum TipoElemento { PC, ROUTER,SWITCH };
 
 struct ElementoVisual {
     TipoElemento tipo;

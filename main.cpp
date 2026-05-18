@@ -14,8 +14,7 @@ void dibujarSwitch(int x, int y);
 void dibujarBoton(const Boton& btn);
 void botonInicializar(Boton& btn, int x, int y, int ancho, int alto, const char* texto) ;
 bool botonRatonEncima(const Boton& btn);
-void crearPc(int x,int y);
-void crearRouter(int x, int t);
+void crearElemento(int x, int y, TipoElemento tipo);
 void manejarArrastre();
 void detectarArrastre();
 void dibujarElementos();
@@ -32,9 +31,10 @@ int main() {
 
     vredimensiona(1500, 1500);
     
-    Boton botonPc, botonRouter;
+    Boton botonPc, botonRouter, botonSwitch;
     botonInicializar(botonPc,20,950,200,50,"pc");
     botonInicializar(botonRouter,600,950,200,50,"router");
+    botonInicializar(botonSwitch,1000,950,200,50,"switch");
 
     while (true) {
         color(NEGRO);
@@ -43,15 +43,20 @@ int main() {
         dibujarElementos();
         dibujarBoton(botonPc);
         dibujarBoton(botonRouter);
-        dibujarSwitch(800,500);
+        dibujarBoton(botonSwitch);
+        
         manejarArrastre();
 
         if (!arrastrando && botonClick(botonPc)) {
-            crearPc(0,0);  
+            crearElemento(0,0,PC);  
         }
         if (!arrastrando && botonClick(botonRouter)) {
-            crearRouter(0,0);  
+            crearElemento(0,0,ROUTER);  
         }
+        if (!arrastrando && botonClick(botonSwitch)) {
+            crearElemento(0,0,SWITCH);  
+        }
+        
         refresca();
         espera(10);
     }
@@ -60,25 +65,23 @@ int main() {
     return 0;
 }
 
-void crearPc(int x,int y){
-grafo.agregarNodo("pc");
 
-ElementoVisual elemento;
-elemento.tipo=PC;
-elemento.x=x;
-elemento.y=y;
-elementos.push_back(elemento);
 
-}
-
-void crearRouter(int x,int y){
-grafo.agregarNodo("router");
-ElementoVisual elemento;
-elemento.tipo=ROUTER;
-elemento.x=x;
-elemento.y=y;
-elementos.push_back(elemento);
-
+void crearElemento(int x,int y,TipoElemento tipo){
+    ElementoVisual elemento;
+    if(tipo==PC){
+        grafo.agregarNodo("pc");
+        elemento.tipo=PC;
+    }else if(tipo==ROUTER){
+        grafo.agregarNodo("router");
+        elemento.tipo=ROUTER;
+    }else{
+        grafo.agregarNodo("switch");
+        elemento.tipo=SWITCH;
+    }
+    elemento.x=x;
+    elemento.y=y;
+    elementos.push_back(elemento);
 }
 void dibujarElementos(){
     for (const auto& elem : elementos) {
@@ -86,6 +89,8 @@ void dibujarElementos(){
             dibujarPc(elem.x, elem.y);
         } else if (elem.tipo == ROUTER) {
             dibujarRouter(elem.x, elem.y);
+        }else if(elem.tipo==SWITCH){
+            dibujarSwitch(elem.x, elem.y);
         }
     }
 }
