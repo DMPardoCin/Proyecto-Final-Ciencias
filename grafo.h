@@ -32,6 +32,18 @@ public:
         nodos[v].agregarEnlace(u, bandwidthBps, latenciaMs);
     }
 
+    vector<tuple<int, int, Enlace>> getEnlaces() {
+        vector<tuple<int, int, Enlace>> lista;
+        for (int u = 0; u < numNodos; ++u) {
+            for (const Enlace& e : nodos[u].adyacentes) {
+                if (u < e.destino) {  // evitar duplicados
+                    lista.emplace_back(u, e.destino, e);
+                }
+            }
+        }
+        return lista;
+    }
+
     // --- Dijkstra con metrica OSPF -------------------
     //
     //  Costo efectivo de un enlace:
