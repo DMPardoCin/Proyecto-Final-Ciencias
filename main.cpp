@@ -1,4 +1,5 @@
 #include "grafo.h"
+#include "pixelRGB.h"
 #include "elementoVisual.h"
 
 #include "miniwin.h"
@@ -23,6 +24,9 @@ void detectarArrastre();
 void dibujarElementos();
 bool botonClick(Boton& btn);
 
+void reemplazarNegros(pixelRGB pc[40][40]);
+void reemplazarNegrosRouter(pixelRGB router[22][40]);
+
 //variables globales
 Grafo grafo;
 bool arrastrando = false;
@@ -34,6 +38,9 @@ int offsetX = 0, offsetY = 0;
 
 int main() {
     
+    reemplazarNegros(pc);
+    
+
 
     vredimensiona(1500, 1500);
     
@@ -43,7 +50,7 @@ int main() {
     botonInicializar(botonSwitch,1000,950,200,50,"switch");
 
     while (true) {
-        color(NEGRO);
+        color_rgb(212,212,212);
         rectangulo_lleno(0,0,1500,1500);
 
         dibujarEnlaces();
@@ -190,22 +197,22 @@ void dibujarElementos(){
 }
 void dibujarEnlaces() {
     // Configurar color y grosor de línea
-    color(BLANCO);
+    color(NEGRO);
     
     for (int u = 0; u < grafo.numNodos; ++u) {
         int x1, y1;
         if (!obtenerPosicionPorId(u, x1, y1)) continue;  // este nodo no está en pantalla (quizás no debería ocurrir)
         // Calcular centro del elemento (suponiendo que todos los elementos tienen el mismo tamaño)
         int cx1 = x1+90;
-        int cy1 = y1+20;
+        int cy1 = y1+90;
         
         for (const Enlace& e : grafo.nodos[u].adyacentes) {
             int v = e.destino;
             if (u < v) {   // Para no duplicar
                 int x2, y2;
                 if (obtenerPosicionPorId(v, x2, y2)) {
-                    int cx2 = x2+40;
-                    int cy2 = y2+80;
+                    int cx2 = x2+80;
+                    int cy2 = y2+110;
                     linea(cx1, cy1, cx2, cy2);
                 }
             }
@@ -248,51 +255,72 @@ void manejarArrastre() {
 
 void dibujarPc(int x, int y) {
     int escala = 4;
+
     for (int i = 0; i < 40; i++) {
         for (int j = 0; j < 40; j++) {
             int r = pc[i][j].R;
             int g = pc[i][j].G;
             int b = pc[i][j].B;
+
+            // Salta píxeles negros solo en el borde exterior
+            bool esBorde = (i == 0 || i == 39 || j == 0 || j == 39);
+            if (esBorde && r == 0 && g == 0 && b == 0) continue;
+
             color_rgb(r, g, b);
             rectangulo_lleno(x + j * escala,
                              y + i * escala,
-                             x + j * escala + escala - 1,
-                             y + i * escala + escala - 1);
+                             x + j * escala + escala,  // sin -1
+                             y + i * escala + escala); // sin -1
         }
     }
 }
 
 void dibujarRouter(int x, int y) {
     int escala = 6;
-    for (int i = 0; i < 40; i++) {
+
+    for (int i = 0; i < 22; i++) {
         for (int j = 0; j < 40; j++) {
             int r = router[i][j].R;
             int g = router[i][j].G;
             int b = router[i][j].B;
+
+            bool esCasiNegro = (r <= 8 && g <= 8 && b <= 8);
+            
+            // Saltar negros en todas las filas excepto el cuerpo del router
+            // El cuerpo empieza aproximadamente en la fila 14
+            bool esBorde = (i <= 22 || j <= 1 || j >= 38);
+            if (esCasiNegro && esBorde) continue;
+
             color_rgb(r, g, b);
             rectangulo_lleno(x + j * escala,
                              y + i * escala,
-                             x + j * escala + escala - 1,
-                             y + i * escala + escala - 1);
+                             x + j * escala + escala,
+                             y + i * escala + escala);
         }
     }
 }
 void dibujarSwitch(int x, int y) {
     int escala = 6;
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 40; j++) {
+
+    for (int i = 0; i < 19; i++) {
+        for (int j = 0; j < 60; j++) {
             int r = switche[i][j].R;
             int g = switche[i][j].G;
             int b = switche[i][j].B;
+
+            // Salta píxeles negros solo en la primera y última fila,
+            // o en las primeras y últimas columnas
+            bool esBorde = (i == 0 || i == 18 || j == 0 || j == 59);
+            if (esBorde && r == 0 && g == 0 && b == 0) continue;
+
             color_rgb(r, g, b);
             rectangulo_lleno(x + j * escala,
                              y + i * escala,
-                             x + j * escala + escala - 1,
-                             y + i * escala + escala - 1);
+                             x + j * escala + escala,
+                             y + i * escala + escala);
         }
     }
 }
-
 void botonInicializar(Boton& btn, int x, int y, int ancho, int alto, const char* texto) {
     //funcion para inicializar un boton con sus atributos
     btn.x = x;
@@ -339,3 +367,21 @@ bool botonClick(Boton& btn) {
     }
     return false;
 }
+
+
+
+void reemplazarNegros(pixelRGB pc[40][40]) {
+    for (int i = 0; i < 40; i++) {
+        for (int j = 0; j < 40; j++) {
+            bool esCasiNegro = (pc[i][j].R <= 1 && pc[i][j].G <= 1 && pc[i][j].B <= 1);
+            bool esBorde = (i < 4 || i > 39) || (j < 3 || j > 33);
+
+            if (esCasiNegro && esBorde) {
+                pc[i][j].R = 212;
+                pc[i][j].G = 212;
+                pc[i][j].B = 212;
+            }
+        }
+    }
+}
+
