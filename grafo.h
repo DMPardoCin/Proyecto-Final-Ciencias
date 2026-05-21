@@ -87,7 +87,7 @@ public:
             {
                 int v = e.destino;
                 // Penalidad por saturacion del nodo destino
-                double penalidad = e.costoOSPF * nodos[v].saturacion;
+                double penalidad = e.costoOSPF;
                 int costoEfectivo = e.costoOSPF + static_cast<int>(penalidad);
                 if (costoEfectivo < 1)
                     costoEfectivo = 1;

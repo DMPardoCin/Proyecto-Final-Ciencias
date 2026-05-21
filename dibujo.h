@@ -141,8 +141,7 @@ inline void dibujarMarcadoresDijkstra()
                 }
                 color_rgb(0, 230, 230);
                 string cStr = "OSPF:" + to_string(cb);
-                if (cTotal != cb)
-                    cStr += " (+" + to_string(cTotal - cb) + " sat)";
+                
                 texto(lx, ly, cStr);
                 color_rgb(200, 200, 200);
                 texto(lx, ly + 14, rutaStr);
